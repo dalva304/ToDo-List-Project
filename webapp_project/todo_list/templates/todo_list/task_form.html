@@ -1,0 +1,138 @@
+{% extends 'todo_list/base.html' %}
+{% load static %}
+{% load form_tags %}
+
+{% block title %}{% if form.instance.id %}Edit Task{% else %}Add New Task{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h3 class="fs-4 mb-0">{% if form.instance.id %}Edit Task{% else %}Add New Task{% endif %}</h3>
+        </div>
+        <div class="card-body p-4">
+          <form method="POST" action="">
+            {% csrf_token %}
+            
+            <!-- Title field -->
+            <div class="form-group mb-3">
+              <label for="{{ form.title.id_for_label }}" class="form-label fw-bold">
+                {{ form.title.label }}:
+              </label>
+              {{ form.title|addclass:"form-control" }}
+              {% if form.title.errors %}
+                {% for error in form.title.errors %}
+                  <div class="alert alert-danger mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+            </div>
+            
+            <!-- Description field -->
+            <div class="form-group mb-3">
+              <label for="{{ form.description.id_for_label }}" class="form-label fw-bold">
+                {{ form.description.label }}:
+              </label>
+              {{ form.description|addclass:"form-control" }}
+              {% if form.description.errors %}
+                {% for error in form.description.errors %}
+                  <div class="alert alert-danger mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+            </div>
+            
+            <!-- Status field -->
+            <div class="form-group mb-3">
+              <label for="{{ form.status.id_for_label }}" class="form-label fw-bold">
+                Status:
+              </label>
+              {{ form.status }}
+              {% if form.status.errors %}
+                {% for error in form.status.errors %}
+                  <div class="alert alert-danger mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+            </div>
+            
+            <!-- Custom Status field (initially hidden) -->
+            <div class="form-group mb-3" id="custom-status-group" style="display: {% if form.instance.status == 'custom' %}block{% else %}none{% endif %};">
+              <label for="{{ form.custom_status.id_for_label }}" class="form-label fw-bold">
+                Custom Status:
+              </label>
+              {{ form.custom_status|addclass:"form-control" }}
+              <small class="form-text text-muted">Enter your own status text</small>
+              {% if form.custom_status.errors %}
+                {% for error in form.custom_status.errors %}
+                  <div class="alert alert-danger mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+            </div>
+            
+            <!-- Due Date field -->
+            <div class="form-group mb-3">
+              <label for="{{ form.duedate.id_for_label }}" class="form-label fw-bold">
+                {{ form.duedate.label }}:
+              </label>
+              {{ form.duedate|addclass:"form-control" }}
+              {% if form.duedate.errors %}
+                {% for error in form.duedate.errors %}
+                  <div class="alert alert-danger mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+            </div>
+            
+            <!-- User field (only for superusers) -->
+            {% if user.is_superuser %}
+            <div class="form-group mb-3">
+              <label for="{{ form.user.id_for_label }}" class="form-label fw-bold">
+                {{ form.user.label }}:
+              </label>
+              {{ form.user|addclass:"form-select" }}
+              {% if form.user.errors %}
+                {% for error in form.user.errors %}
+                  <div class="alert alert-danger mt-1">{{ error }}</div>
+                {% endfor %}
+              {% endif %}
+            </div>
+            {% endif %}
+            
+            <div class="d-flex justify-content-between mt-4">
+              <a href="{% url 'tasks' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left me-2"></i>Back to List
+              </a>
+              <button type="submit" class="btn btn-success">
+                <i class="bi bi-check-circle me-2"></i>Save Task
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Function to toggle the custom status field
+  function toggleCustomStatus(status) {
+    const customStatusGroup = document.getElementById('custom-status-group');
+    const customStatusInput = document.getElementById('{{ form.custom_status.id_for_label }}');
+    
+    if (status === 'custom') {
+      customStatusGroup.style.display = 'block';
+      customStatusInput.required = true;
+    } else {
+      customStatusGroup.style.display = 'none';
+      customStatusInput.required = false;
+    }
+  }
+  
+  // Initialize on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    const statusSelect = document.querySelector('.status-select');
+    if (statusSelect) {
+      toggleCustomStatus(statusSelect.value);
+    }
+  });
+</script>
+{% endblock %}
